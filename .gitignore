@@ -91,6 +91,4 @@ target/
 .pytest_cache/
 
 # Data and models
-data/*/*
-models/*
 !.gitkeep
