@@ -5,11 +5,11 @@ import sklearn.cluster as cluster
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-# Load the customer churn dataset into dataframe
+# Load the customer churn dataset into dataframe.
 churn_df = pd.read_csv('Customer_Churn.csv')
 print(churn_df.head(5))
 
-# Total Charges column was categorical but must be a numerical value
+# Total Charges column was categorical but must be a numerical value.
 # hence we convert it to categorical and fill with NAN values if there are errors.
 churn_df["TotalCharges"] = pd.to_numeric(churn_df["TotalCharges"], errors='coerce')
 
