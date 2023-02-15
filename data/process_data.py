@@ -1,7 +1,4 @@
 import pandas as pd
-import numpy as np
-import torch
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
 
@@ -38,7 +35,7 @@ def process_data_churn(file):
 
     # get dummary for categorical columns now
     churn_df = pd.get_dummies(churn_df)
-    churn_df = churn_df.astype(float)
+    # churn_df = churn_df.astype(float)
     # print(churn_df.head(5))
 
     # Extract the features and labels

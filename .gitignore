@@ -90,5 +90,3 @@ target/
 # pytest cache
 .pytest_cache/
 
-# Data and models
-!.gitkeep
