@@ -1,74 +1,55 @@
-import numpy as np
+from sklearn.metrics import accuracy_score
 import AutomatingAnalysisModelsAndMisprediction.data.process_data as process
-import sklearn.cluster as cluster
+from sklearn.cluster import KMeans
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
-
 churn_df, X_train, X_test, Y_train, Y_test = process.process_data_churn('Customer_Churn.csv')
+
+# Collect data on model faults and mispredictions : Logistic Regression
+reg_model = LogisticRegression(max_iter=1000)
+reg_model.fit(X_train, Y_train)
+log_reg_score = reg_model.score(X_test, Y_test)
+accuracy_dict = {}
+print('Logistic Regression accuracy before changes: ', log_reg_score * 100, '%')
+
+# Predict the target variable for the testing set
+Y_pred = reg_model.predict(X_test)
+
+# Identify the mispredictions and their associated feature values
+data_test = X_test.copy()
+data_test['Churn'] = Y_test
+data_test['Prediction'] = Y_pred
+mispredictions = data_test[data_test['Churn'] != data_test['Prediction']]
+
 # Use k-means clustering to identify groups of similar customers
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X_train)
-kmeans = cluster.KMeans(n_clusters=3, random_state=42)
-kmeans.fit(X_scaled)
+n_clusters = 5
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+clusters = kmeans.fit_predict(mispredictions.drop(['Churn', 'Prediction'], axis=1))
 
-# Get the cluster assignments for each customer
-cluster_labels = kmeans.predict(X_scaled)
+# Use feature engineering to identify the common features that are contributing to the mispredictions in each cluster
+for i in range(n_clusters):
+    print('Cluster ', i, 'common features: ')
+    cluster_data = mispredictions[clusters == i].drop(['Churn', 'Prediction'], axis=1)
+    common_features = cluster_data.mean().sort_values(ascending=False)
+    print(common_features)
 
-# Identify the examples with the highest misprediction rates
-"""mispredictions = (Y_train != kmeans.predict(X_scaled)).astype(int)
-misprediction_rates = np.mean(mispredictions, axis=1)
-high_misprediction_indices = np.argsort(misprediction_rates)[-10:]
+    # Make changes to the predictive model to reduce the misprediction rate
+    # For example, we might remove the least informative features.
+    # So, we will drop the least informative features and retrain the model on the original dataset with these changes
+    least_informative_features = common_features[common_features < 0.56].index
+    X_train_new = X_train.drop(least_informative_features, axis=1)
+    X_test_new = X_test.drop(least_informative_features, axis=1)
 
-# Print the inputs and outputs of the examples with the highest misprediction rates.
-for i in high_misprediction_indices:
-    print('Example', i)
-    print('Input:', X_train[i])
-    print('Output:', Y_train[i])
-    print()"""
+    model_new = LogisticRegression(max_iter=1000)
+    model_new.fit(X_train_new, Y_train)
 
-# Identify the common features contributing to the mispredictions
-cluster_centers = scaler.inverse_transform(kmeans.cluster_centers_)
-feature_names = churn_df.drop(['Churn'], axis=1).columns
+    Y_pred_new = model_new.predict(X_test_new)
+    accuracy_new = accuracy_score(Y_test, Y_pred_new)
+    accuracy_dict.update({i: accuracy_new})
+    print('Accuracy of the model with the drop of the least informative features in the cluster', i, 'is',
+          accuracy_new * 100, '%')
 
-for i, cluster in enumerate(cluster_centers):
-    print('Cluster', i)
-    for feature, value in zip(feature_names, cluster):
-        print(feature, ':', value)
-    print()
-
-# Use feature engineering to create new features that better capture the underlying factors driving mispredictions
-"""X_new = np.zeros((X_train.shape[0], X_train.shape[1]+1))
-X_new[:,:-1] = X_train
-X_new[:,-1] = X_train[:,0] + X_train[:,1]
-
-# Fit the k-means clustering model with the new features
-X_new_scaled = scaler.fit_transform(X_new)
-kmeans = cluster.KMeans(n_clusters=3, random_state=42)
-kmeans.fit(X_new_scaled)
-
-# Get the cluster assignments for each example using the new features
-cluster_labels = kmeans.predict(X_new_scaled)
-
-# Identify the examples with the highest misprediction rates using the new features
-mispredictions = (Y_train != kmeans.predict(X_new_scaled)).astype(int)
-misprediction_rates = np.mean(mispredictions, axis=1)
-high_misprediction_indices = np.argsort(misprediction_rates)[-10:]
-
-# Print the inputs and outputs of the examples with the highest misprediction rates using the new features
-for i in high_misprediction_indices:
-    print('Example', i)
-    print('Input:', X_new[i])
-    print('Output:', Y_train[i])
-    print()
-
-# Identify the common features contributing to the mispredictions using the new features
-cluster_centers = scaler.inverse_transform(kmeans.cluster_centers_)
-feature_names = churn_df.drop(['Churn'], axis=1).columns
-feature_names_new = list(feature_names) + ['New Feature']
-
-for i, cluster in enumerate(cluster_centers):
-    print('Cluster', i)
-    for feature, value in zip(feature_names_new, cluster):
-        print(feature, ':', value)
-    print()"""
-
+max_accuracy = max(accuracy_dict.values())
+print('The max accuracy we could get is', max_accuracy * 100, '%')
+print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')
