@@ -3,7 +3,17 @@ create Pydantic models
 """
 from typing import List
 
-from pydantic import BaseModel, validator
+
+
+class Location(dbName):
+    """Specify the locations of inputs and outputs"""
+
+    data_raw: str = f"data/raw/{dbName}.csv"
+    data_process: str = "data/processed/creditcard.pkl"
+    data_final: str = "data/final/predictions-creditcard.pkl"
+    model: str = "models/svc-creditcard.pkl"
+    input_notebook: str = "notebooks/analyze_results.ipynb"
+    output_notebook: str = "notebooks/results.ipynb"
 
 
 def must_be_non_negative(v: float) -> float:
@@ -29,18 +39,8 @@ def must_be_non_negative(v: float) -> float:
     return v
 
 
-class Location(BaseModel):
-    """Specify the locations of inputs and outputs"""
 
-    data_raw: str = "data/raw/iris.csv"
-    data_process: str = "data/processed/xy.pkl"
-    data_final: str = "data/final/predictions.pkl"
-    model: str = "models/svc.pkl"
-    input_notebook: str = "notebooks/analyze_results.ipynb"
-    output_notebook: str = "notebooks/results.ipynb"
-
-
-class ProcessConfig(BaseModel):
+class ProcessConfig():
     """Specify the parameters of the `process` flow"""
 
     drop_columns: List[str] = ["Id"]
@@ -52,7 +52,7 @@ class ProcessConfig(BaseModel):
     )
 
 
-class ModelParams(BaseModel):
+class ModelParams():
     """Specify the parameters of the `train` flow"""
 
     C: List[float] = [0.1, 1, 10, 100, 1000]

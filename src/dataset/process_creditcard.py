@@ -2,9 +2,15 @@
 
 import joblib
 import pandas as pd
-from config import Location, ProcessConfig
 from prefect import flow, task
-from sklearn.model_selection import train_test_split
+# from sklearn.model_selection import train_test_split
+
+import sys
+import os
+print(sys.path)
+sys.path.insert(0, os.getcwd() + "/src/config")
+print(sys.path)
+from config import Location, ProcessConfig
 
 
 @task
@@ -102,10 +108,10 @@ def process(
         Configurations for processing data, by default ProcessConfig()
     """
     data = get_raw_data(location.data_raw)
-    processed = drop_columns(data, config.drop_columns)
-    X, y = get_X_y(processed, config.label)
-    split_data = split_train_test(X, y, config.test_size)
-    save_processed_data(split_data, location.data_process)
+    # processed = drop_columns(data, config.drop_columns)
+    # X, y = get_X_y(processed, config.label)
+    # split_data = split_train_test(X, y, config.test_size)
+    # save_processed_data(split_data, location.data_process)
 
 
 if __name__ == "__main__":
