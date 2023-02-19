@@ -1,6 +1,6 @@
-# AutomatingAnalysisModelsAndMisprediction
+# Automating Analysis Models And Misprediction
 
-Automating The Analysis Of Model Faults And Mispredictions
+Automating The Analysis Of Model Faults And Mispredictions.
 
 The steps we will take in order to implement our solutions are:
 1. First we will gather the data and preprocess the data.
@@ -12,9 +12,10 @@ The steps we will take in order to implement our solutions are:
 
 # Data bases links:
 1. https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-2. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+2. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud~~~~
 
 # Notes!
 1. For data csv files we use Git’s Large File System (Git LFS)
-2. Make sure that when run the code, the src folder is set to the working directory
+2. Make sure that when run the code, the src folder is set to the working directory:
+![img.png](images/img.png)
 
