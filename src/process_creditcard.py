@@ -2,18 +2,10 @@
 
 import joblib
 import pandas as pd
-from prefect import flow, task
-# from sklearn.model_selection import train_test_split
 
-import sys
-import os
-print(sys.path)
-sys.path.insert(0, os.getcwd() + "/src/config")
-print(sys.path)
-from config import Location, ProcessConfig
+import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+import config.config_creditcard as config_creditcard
 
-
-@task
 def get_raw_data(data_location: str):
     """Read raw data
 
@@ -25,7 +17,7 @@ def get_raw_data(data_location: str):
     return pd.read_csv(data_location)
 
 
-@task
+
 def drop_columns(data: pd.DataFrame, columns: list):
     """Drop unimportant columns
 
@@ -39,7 +31,7 @@ def drop_columns(data: pd.DataFrame, columns: list):
     return data.drop(columns=columns)
 
 
-@task
+
 def get_X_y(data: pd.DataFrame, label: str):
     """Get features and label
 
@@ -55,31 +47,6 @@ def get_X_y(data: pd.DataFrame, label: str):
     return X, y
 
 
-@task
-def split_train_test(X: pd.DataFrame, y: pd.DataFrame, test_size: int):
-    """_summary_
-
-    Parameters
-    ----------
-    X : pd.DataFrame
-        Features
-    y : pd.DataFrame
-        Target
-    test_size : int
-        Size of the test set
-    """
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=0
-    )
-    return {
-        "X_train": X_train,
-        "X_test": X_test,
-        "y_train": y_train,
-        "y_test": y_test,
-    }
-
-
-@task
 def save_processed_data(data: dict, save_location: str):
     """Save processed data
 
@@ -93,10 +60,9 @@ def save_processed_data(data: dict, save_location: str):
     joblib.dump(data, save_location)
 
 
-@flow
+
 def process(
-    location: Location = Location(),
-    config: ProcessConfig = ProcessConfig(),
+    location: config_creditcard.Location = config_creditcard.Location()
 ):
     """Flow to process the ata
 
@@ -108,11 +74,8 @@ def process(
         Configurations for processing data, by default ProcessConfig()
     """
     data = get_raw_data(location.data_raw)
-    # processed = drop_columns(data, config.drop_columns)
+    processed = drop_columns(data, config_creditcard.ProcessConfig().drop_columns)
     # X, y = get_X_y(processed, config.label)
     # split_data = split_train_test(X, y, config.test_size)
     # save_processed_data(split_data, location.data_process)
 
-
-if __name__ == "__main__":
-    process(config=ProcessConfig(test_size=0.1))
