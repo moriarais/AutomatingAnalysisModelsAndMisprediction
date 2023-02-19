@@ -4,7 +4,6 @@ import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 import config.config_creditcard as config_creditcard
 
 def get_raw_data(data_location: str):
@@ -55,7 +54,7 @@ def save_processed_data(data: dict, save_location: str):
     joblib.dump(data, save_location)
 
 def process(
-    location: config_creditcard.Location = config_creditcard.Location()
+    location: config_creditcard.Location = config_creditcard.Location
 ):
     """Flow to process the Data
     """
@@ -78,8 +77,8 @@ def process(
     # After cleaning and processing the database, display general statistics of dataset
     print(processed.describe())    
 
-    X, y = get_X_y(processed, config_creditcard.ProcessConfig().label)
-    split_data = split_train_test(X, y, config_creditcard.ProcessConfig().test_size)
-    save_processed_data(split_data, config_creditcard.Location().data_process)
+    X, y = get_X_y(processed, config_creditcard.ProcessConfig.label)
+    split_data = split_train_test(X, y, config_creditcard.ProcessConfig.test_size)
+    save_processed_data(split_data, config_creditcard.Location.data_process)
 
 process()

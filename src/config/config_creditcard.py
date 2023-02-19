@@ -2,7 +2,7 @@
 create Pydantic models
 """
 from typing import List
-class Location():
+class Location:
     """Specify the locations of inputs and outputs"""
 
     data_raw: str = f"data/raw/creditcard.csv"
@@ -12,7 +12,7 @@ class Location():
     input_notebook: str = "notebooks/analyze_results.ipynb"
     output_notebook: str = "notebooks/results.ipynb"
 
-class ProcessConfig():
+class ProcessConfig:
     """Specify the parameters of the `process` flow"""
 
     label: str = "Class"

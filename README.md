@@ -15,5 +15,6 @@ The steps we will take in order to implement our solutions are:
 2. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 
 # Notes!
-For data csv files we use Git’s Large File System (Git LFS)
+1. For data csv files we use Git’s Large File System (Git LFS)
+2. Make sure that when run the code, the src folder is set to the working directory
 
