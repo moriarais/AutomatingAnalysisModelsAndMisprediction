@@ -1,10 +1,9 @@
 from sklearn.metrics import accuracy_score
-import AutomatingAnalysisModelsAndMisprediction.data.process_data as process
+import AutomatingAnalysisModelsAndMisprediction.src.process_data_churn as process
 from sklearn.cluster import KMeans
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 
-churn_df, X_train, X_test, Y_train, Y_test = process.process_data_churn('Customer_Churn.csv')
+churn_df, X_train, X_test, Y_train, Y_test = process.process_data_churn('../data/Customer_Churn.csv')
 
 # Collect data on model faults and mispredictions : Logistic Regression
 reg_model = LogisticRegression(max_iter=1000)
