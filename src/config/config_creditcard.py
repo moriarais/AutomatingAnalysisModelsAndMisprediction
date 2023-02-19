@@ -1,13 +1,24 @@
 """
 create Pydantic models
 """
-from typing import List
+import os
+
 class Location:
     """Specify the locations of inputs and outputs"""
 
-    data_raw: str = f"data/raw/creditcard.csv"
-    data_process: str = "data/processed/creditcard.pkl"
-    data_final: str = "data/final/predictions-creditcard.pkl"
+    # Get the path of the directory containing the script file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Navigate up to the top-level directory
+    src_level_dir = os.path.dirname(script_dir)
+
+    top_level_dir = os.path.dirname(src_level_dir)
+
+    # Define the relative path to the data directory
+    data_dir = os.path.join(top_level_dir, "data")
+
+    data_raw: str = f"{data_dir}/raw/creditcard.csv"
+    data_process: str = f"{data_dir}/creditcard.pkl"
     model: str = "models/svc-creditcard.pkl"
     input_notebook: str = "notebooks/analyze_results.ipynb"
     output_notebook: str = "notebooks/results.ipynb"
