@@ -12,7 +12,7 @@ The steps we will take in order to implement our solutions are:
 
 # Data bases links:
 1. https://www.kaggle.com/datasets/blastchar/telco-customer-churn
-2. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud~~~~
+2. https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 
 # Notes!
 1. For data csv files we use Git’s Large File System (Git LFS)
