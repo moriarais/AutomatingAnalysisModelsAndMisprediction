@@ -1,5 +1,5 @@
 import torch
-import AutomatingAnalysisModelsAndMisprediction.src.process_data_churn as process
+import AutomatingAnalysisModelsAndMisprediction.src.process_data_churn as process_churn
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
@@ -11,9 +11,10 @@ from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
+import AutomatingAnalysisModelsAndMisprediction.src.process_data_bankrupt as process_bank
 
 
-def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt):
+def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
     # Collect data on model faults and mispredictions : Logistic Regression
     print("K_means_identify function")
     print()
@@ -28,20 +29,20 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt):
 
     # Identify the mispredictions and their associated feature values
     data_test = X_testt.copy()
-    data_test['Churn'] = Y_testt
+    data_test[word] = Y_testt
     data_test['Prediction'] = Y_pred
-    mispredictions = data_test[data_test['Churn'] != data_test['Prediction']]
+    mispredictions = data_test[data_test[word] != data_test['Prediction']]
 
     # Use k-means clustering to identify groups of similar customers
     n_clusters = 5
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=20)
-    clusters = kmeans.fit_predict(mispredictions.drop(['Churn', 'Prediction'], axis=1))
+    clusters = kmeans.fit_predict(mispredictions.drop([word, 'Prediction'], axis=1))
 
     # Use feature engineering to identify the common features that are contributing to the mispredictions in each
     # cluster
     for i in range(n_clusters):
         # print('Cluster ', i, 'common features: ')
-        cluster_data = mispredictions[clusters == i].drop(['Churn', 'Prediction'], axis=1)
+        cluster_data = mispredictions[clusters == i].drop([word, 'Prediction'], axis=1)
         common_features = cluster_data.mean().sort_values(ascending=False)
         # print(common_features)
 
@@ -113,7 +114,7 @@ def py_optimize_neural(X_tr, X_te, Y_tr, Y_te):
     test_actuals = Y_te.detach().numpy().astype(int)
 
     accuracy = accuracy_score(test_actuals, test_predictions)
-    precision = precision_score(test_actuals, test_predictions)
+    precision = precision_score(test_actuals, test_predictions, zero_division=1)
     recall = recall_score(test_actuals, test_predictions)
     f1 = f1_score(test_actuals, test_predictions)
 
@@ -134,8 +135,8 @@ def py_optimize_neural(X_tr, X_te, Y_tr, Y_te):
     # Plot the confusion matrix
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
     plt.colorbar()
-    plt.xticks([0, 1], ['Not Churn', 'Churn'])
-    plt.yticks([0, 1], ['Not Churn', 'Churn'])
+    plt.xticks([0, 1], ['No', 'Yes'])
+    plt.yticks([0, 1], ['No', 'Yes'])
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix')
@@ -162,7 +163,7 @@ def py_different_model(X_trainn, Y_trainn):
     print()
     # Define the pipelines for the different models to be compared
     pipelines = {
-        'lr': Pipeline([('scaler', StandardScaler()), ('clf', LogisticRegression())]),
+        'lr': Pipeline([('scaler', StandardScaler()), ('clf', LogisticRegression(max_iter=1000))]),
         'rf': Pipeline([('scaler', StandardScaler()), ('clf', RandomForestClassifier())]),
         'svc': Pipeline([('scaler', StandardScaler()), ('clf', SVC())])
     }
@@ -231,7 +232,7 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
     plt.hist(Y_pred_torch.detach().numpy(), bins=20, alpha=0.5, label='Predictions')
     plt.hist(Y_test_torch, bins=20, alpha=0.5, label='Actual Outcomes')
     plt.legend(loc='upper right')
-    plt.xlabel('Churn Probability')
+    plt.xlabel('Probability')
     plt.ylabel('Frequency')
     plt.show()
 
@@ -246,8 +247,13 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
-    churn_df, X_train, X_test, Y_train, Y_test = process.process_data_churn('../data/Customer_Churn.csv')
-    k_means_identify(X_train, X_test, Y_train, Y_test)
+    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/Customer_Churn.csv')
+    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
+    # py_different_model(X_train, Y_train)
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
+    X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/ Company_Bankruptcy.csv')
     py_different_model(X_train, Y_train)
-    py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    py_visualization(X_train, X_test, Y_train, Y_test)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
+    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
