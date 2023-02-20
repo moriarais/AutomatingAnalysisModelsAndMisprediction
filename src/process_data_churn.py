@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-def process_data_churn(file):
+def get_process_data_churn(file):
     # Load the customer churn dataset into dataframe.
     churn_df = pd.read_csv(file)
     # print(churn_df.head(5))
@@ -44,4 +44,4 @@ def process_data_churn(file):
 
     #  we split the data into training and testing sets
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
-    return churn_df, X_train, X_test, Y_train, Y_test
+    return X_train, X_test, Y_train, Y_test
