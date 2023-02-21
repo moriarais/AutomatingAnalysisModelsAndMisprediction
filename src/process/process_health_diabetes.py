@@ -3,14 +3,14 @@
 import pandas as pd
 
 import config.config_health_diabetes as config_diabetes
-import config.config_utils as config_utils
+import process.process_utils as process_utils
 
 def process(
         location: config_diabetes.Location = config_diabetes.Location
 ):
     """Flow to process the Data
     """
-    data = config_utils.get_raw_data(location.data_raw)
+    data = process_utils.get_raw_data(location.data_raw)
 
     # Cleaning the data process:
 
@@ -30,11 +30,11 @@ def process(
     # After cleaning and processing the database, display general statistics of dataset
     # print(processed.describe())
 
-    X, y = config_utils.get_X_y(processed, config_diabetes.ProcessConfig.label)
-    split_data = config_utils.split_train_test(X, y, config_diabetes.ProcessConfig.test_size)
-    config_utils.save_processed_data(split_data, config_diabetes.Location.data_process)
+    X, y = process_utils.get_X_y(processed, config_diabetes.ProcessConfig.label)
+    split_data = process_utils.split_train_test(X, y, config_diabetes.ProcessConfig.test_size)
+    process_utils.save_processed_data(split_data, config_diabetes.Location.data_process)
 
 
 if __name__ == "__main__":
     process()
-    X_train, X_test, y_train, y_test = config_utils.getProcessedData(config_diabetes.Location.data_process)
+    X_train, X_test, y_train, y_test = process_utils.getProcessedData(config_diabetes.Location.data_process)

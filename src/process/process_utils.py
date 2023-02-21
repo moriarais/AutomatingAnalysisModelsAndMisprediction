@@ -16,7 +16,7 @@ def getProcessedData(file_path: str):
 
 
 def getUnprocessedData(url: str):
-    dataset = pd.read_csv(url, header=None)
+    dataset = pd.read_csv(url)
     return dataset
 
 
