@@ -4,7 +4,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import pickle
 
-import config.config_creditcard as config_creditcard
+import config.config_health_diabetes as config_diabetes
 
 
 def get_raw_data(data_location: str):
@@ -66,7 +66,7 @@ def print_pkl_file(file_path: str):
 
 
 def process(
-        location: config_creditcard.Location = config_creditcard.Location
+        location: config_diabetes.Location = config_diabetes.Location
 ):
     """Flow to process the Data
     """
@@ -74,25 +74,25 @@ def process(
 
     # Cleaning the data process:
 
-    # 1. Null values handler. There are no null values in DB.
+    # 1. Null values' handler. There are no null values in DB.
     # print(data.isnull().sum())
     # data.dropna(inplace=True)
     # print(data.isnull().sum())
 
     # 2. All the features are required for the ml process
 
-    # 3. Convert to numeric Class feature
-    # 0 - non-fraudulent. 1 - fraudulent.
-    data[config_creditcard.ProcessConfig.label] = pd.to_numeric(data[config_creditcard.ProcessConfig.label], errors='coerce')
+    # 3. Convert to numeric Outcome feature
+    # 0 - no diabetes. 1 - no diabetes.
+    data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label], errors='coerce')
 
     processed = data
     processed = pd.get_dummies(processed)
     # After cleaning and processing the database, display general statistics of dataset
     # print(processed.describe())
 
-    X, y = get_X_y(processed, config_creditcard.ProcessConfig.label)
-    split_data = split_train_test(X, y, config_creditcard.ProcessConfig.test_size)
-    save_processed_data(split_data, config_creditcard.Location.data_process)
+    X, y = get_X_y(processed, config_diabetes.ProcessConfig.label)
+    split_data = split_train_test(X, y, config_diabetes.ProcessConfig.test_size)
+    save_processed_data(split_data, config_diabetes.Location.data_process)
 
 
 
@@ -107,10 +107,7 @@ def getProcessedData(file_path: str):
     y_test = split_dict["y_test"]
     return X_train, X_test, y_train, y_test
 
-def getUnprocessedData(url: str):
-    dataset = pd.read_csv(url, header=None)
-    return dataset
 
 if __name__ == "__main__":
     process()
-    X_train, X_test, y_train, y_test = getProcessedData(config_creditcard.Location.data_process)
+    X_train, X_test, y_train, y_test = getProcessedData(config_diabetes.Location.data_process)
