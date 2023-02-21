@@ -83,7 +83,7 @@ def process(
 
     # 3. Convert to numeric Class feature
     # 0 - non-fraudulent. 1 - fraudulent.
-    data["Class"] = pd.to_numeric(data["Class"], errors='coerce')
+    data[config_creditcard.ProcessConfig.label] = pd.to_numeric(data[config_creditcard.ProcessConfig.label], errors='coerce')
 
     processed = data
     processed = pd.get_dummies(processed)
