@@ -107,6 +107,9 @@ def getProcessedData(file_path: str):
     y_test = split_dict["y_test"]
     return X_train, X_test, y_train, y_test
 
+def getUnprocessedData(url: str):
+    dataset = pd.read_csv(url, header=None)
+    return dataset
 
 if __name__ == "__main__":
     process()
