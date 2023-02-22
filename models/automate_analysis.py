@@ -247,12 +247,12 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
-    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/Customer_Churn.csv')
+    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
     # py_different_model(X_train, Y_train)
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
     # py_visualization(X_train, X_test, Y_train, Y_test)
-    X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/ Company_Bankruptcy.csv')
+    X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     py_different_model(X_train, Y_train)
     # py_visualization(X_train, X_test, Y_train, Y_test)
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
