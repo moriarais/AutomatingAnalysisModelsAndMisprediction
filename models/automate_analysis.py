@@ -251,8 +251,6 @@ if __name__ == "__main__":
     # py_different_model(X_train, Y_train)
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
     # py_visualization(X_train, X_test, Y_train, Y_test)
-<<<<<<< Updated upstream
-=======
 
     # X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     # py_different_model(X_train, Y_train)
@@ -260,7 +258,6 @@ if __name__ == "__main__":
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
 
->>>>>>> Stashed changes
     X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     py_different_model(X_train, Y_train)
     # py_visualization(X_train, X_test, Y_train, Y_test)
