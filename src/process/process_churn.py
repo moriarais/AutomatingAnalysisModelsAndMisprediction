@@ -33,7 +33,7 @@ def get_process_data_churn(file):
     churn_df['Churn'] = churn_df['Churn'].map({'Yes': 1, 'No': 0})
     # print(churn_df.head(5))
 
-    # get dummary for categorical columns now
+    # get dummy for categorical columns now
     churn_df = pd.get_dummies(churn_df)
     # churn_df = churn_df.astype(float)
     # print(churn_df.head(5))

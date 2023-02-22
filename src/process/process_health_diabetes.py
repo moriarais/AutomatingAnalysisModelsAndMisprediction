@@ -7,6 +7,7 @@ import pickle
 import config.config_health_diabetes as config_diabetes
 # import AutomatingAnalysisModelsAndMisprediction.src.config.config_health_diabetes as config_diabetes
 
+
 def get_raw_data(data_location: str):
     """Read raw data
     """
@@ -94,6 +95,7 @@ def process(
     X, y = get_X_y(processed, config_diabetes.ProcessConfig.label)
     split_data = split_train_test(X, y, config_diabetes.ProcessConfig.test_size)
     save_processed_data(split_data, config_diabetes.Location.data_process)
+
 
 
 def getProcessedData(file_path: str):

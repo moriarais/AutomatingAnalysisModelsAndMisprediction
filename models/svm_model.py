@@ -2,7 +2,6 @@ import process.process_creditcard as process_creditcard
 import config.config_creditcard as config_creditcard
 from sklearn import svm
 
-
 def generate_model(X_train, X_test, Y_train, Y_test):
     # Create a svm Classifier
     clf = svm.SVC(kernel='linear')  # Linear Kernel

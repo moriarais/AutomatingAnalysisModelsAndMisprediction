@@ -3,7 +3,6 @@ create Pydantic models
 """
 import os
 
-
 class Location:
     """Specify the locations of inputs and outputs"""
 
@@ -23,7 +22,6 @@ class Location:
     model: str = "models/svc-creditcard.pkl"
     input_notebook: str = "notebooks/analyze_results.ipynb"
     output_notebook: str = "notebooks/results.ipynb"
-
 
 class ProcessConfig:
     """Specify the parameters of the `process` flow"""
