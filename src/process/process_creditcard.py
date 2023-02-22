@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 import config.config_creditcard as config_creditcard
+# import AutomatingAnalysisModelsAndMisprediction.src.config.config_creditcard as config_creditcard
 
 
 def get_raw_data(data_location: str):

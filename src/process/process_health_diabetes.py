@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 import config.config_health_diabetes as config_diabetes
+# import AutomatingAnalysisModelsAndMisprediction.src.config.config_health_diabetes as config_diabetes
 
 
 def get_raw_data(data_location: str):
@@ -83,7 +84,8 @@ def process(
 
     # 3. Convert to numeric Outcome feature
     # 0 - no diabetes. 1 - no diabetes.
-    data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label], errors='coerce')
+    data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label],
+                                                              errors='coerce')
 
     processed = data
     processed = pd.get_dummies(processed)
