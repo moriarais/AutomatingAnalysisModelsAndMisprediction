@@ -26,7 +26,8 @@ def process(
     data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label], errors='coerce')
 
     processed = data
-    processed = pd.get_dummies(processed)
+    # converting to binary data
+    processed = pd.get_dummies(processed[config_diabetes.ProcessConfig.label])
     # After cleaning and processing the database, display general statistics of dataset
     # print(processed.describe())
 
