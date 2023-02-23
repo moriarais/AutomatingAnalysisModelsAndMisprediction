@@ -17,8 +17,8 @@ class Location:
     # Define the relative path to the data directory
     data_dir = os.path.join(top_level_dir, "data")
 
-    data_raw: str = f"{data_dir}\\raw\\health_diabetes.csv"
-    data_process: str = f"{data_dir}\\processed\\health_diabetes.pkl"
+    data_raw: str = f"{data_dir}/raw/health_diabetes.csv"
+    data_process: str = f"{data_dir}/processed/health_diabetes.pkl"
     model: str = "models/svc_health_diabetes.pkl"
     input_notebook: str = "notebooks/analyze_results_health_diabetes.ipynb"
     output_notebook: str = "notebooks/results_health_diabetes.ipynb"
