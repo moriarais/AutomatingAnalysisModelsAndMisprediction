@@ -17,8 +17,8 @@ class Location:
     # Define the relative path to the data directory
     data_dir = os.path.join(top_level_dir, "data")
 
-    data_raw: str = f"{data_dir}\\raw\\creditcard.csv"
-    data_process: str = f"{data_dir}\\processed\\creditcard.pkl"
+    data_raw: str = f"{data_dir}/raw/creditcard.csv"
+    data_process: str = f"{data_dir}/processed/creditcard.pkl"
     model: str = "models/svc-creditcard.pkl"
     input_notebook: str = "notebooks/analyze_results.ipynb"
     output_notebook: str = "notebooks/results.ipynb"
