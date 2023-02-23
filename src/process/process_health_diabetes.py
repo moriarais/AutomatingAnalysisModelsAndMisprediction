@@ -4,6 +4,7 @@ import pandas as pd
 
 import config.config_health_diabetes as config_diabetes
 import process.process_utils as process_utils
+# import AutomatingAnalysisModelsAndMisprediction.src.config.config_health_diabetes as config_diabetes
 
 def process(
         location: config_diabetes.Location = config_diabetes.Location
@@ -23,7 +24,8 @@ def process(
 
     # 3. Convert to numeric Outcome feature
     # 0 - no diabetes. 1 - no diabetes.
-    data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label], errors='coerce')
+    data[config_diabetes.ProcessConfig.label] = pd.to_numeric(data[config_diabetes.ProcessConfig.label],
+                                                              errors='coerce')
 
     processed = data
     # converting to binary data

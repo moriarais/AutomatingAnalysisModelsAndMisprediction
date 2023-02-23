@@ -1,8 +1,7 @@
 import torch
-import AutomatingAnalysisModelsAndMisprediction.src.process_data_churn as process_churn
 from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -11,7 +10,7 @@ from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
-import AutomatingAnalysisModelsAndMisprediction.src.process_data_bankrupt as process_bank
+import AutomatingAnalysisModelsAndMisprediction.src.process.process_data_bankrupt as process_bank
 
 
 def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
@@ -247,13 +246,21 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
-    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/Customer_Churn.csv')
+    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
     # py_different_model(X_train, Y_train)
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
     # py_visualization(X_train, X_test, Y_train, Y_test)
-    X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/ Company_Bankruptcy.csv')
+
+    # X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
+    # py_different_model(X_train, Y_train)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
+    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+
+    X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     py_different_model(X_train, Y_train)
     # py_visualization(X_train, X_test, Y_train, Y_test)
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+
