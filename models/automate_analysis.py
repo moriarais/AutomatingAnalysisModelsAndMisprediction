@@ -1,6 +1,8 @@
 import torch
 from sklearn.cluster import KMeans
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import RFE, SelectKBest, f_classif
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, silhouette_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -10,21 +12,28 @@ from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, roc_curve, auc
-import AutomatingAnalysisModelsAndMisprediction.src.process.process_data_bankrupt as process_bank
+# import AutomatingAnalysisModelsAndMisprediction.src.process.process_data_bankrupt as process_bank
+import process.process_churn as process_churn
+import process.process_bankrupt as process_bank
+import process.process_creditcard as process_card
+import config.config_creditcard as config_creditcard
+import numpy as np
 
 
 def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
     # Collect data on model faults and mispredictions : Logistic Regression
     print("K_means_identify function")
     print()
+    # Scale the inputs to have zero mean and unit variance
+    scaler = StandardScaler()
     reg_model = LogisticRegression(max_iter=1000)
-    reg_model.fit(X_trainn, Y_trainn)
-    log_reg_score = reg_model.score(X_testt, Y_testt)
+    reg_model.fit(scaler.fit_transform(X_trainn), Y_trainn)
+    log_reg_score = reg_model.score(scaler.fit_transform(X_testt), Y_testt)
     accuracy_dict = {}
-    print('Logistic Regression accuracy before changes: ', log_reg_score * 100, '%')
+    print('Logistic Regression before changes: ', log_reg_score * 100, '%')
 
     # Predict the target variable for the testing set
-    Y_pred = reg_model.predict(X_testt)
+    Y_pred = reg_model.predict(scaler.fit_transform(X_testt))
 
     # Identify the mispredictions and their associated feature values
     data_test = X_testt.copy()
@@ -32,14 +41,60 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
     data_test['Prediction'] = Y_pred
     mispredictions = data_test[data_test[word] != data_test['Prediction']]
 
+    # Use the elbow method to determine the optimal number of clusters
+    mispredictions_array = mispredictions.drop([word, 'Prediction'], axis=1).values
+    distortions = []
+    for n_clusters in range(2, 20):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=20)
+        kmeans.fit(mispredictions_array)
+        distortions.append(kmeans.inertia_)
+
+    # Select the optimal number of clusters based on the elbow method
+    best_n_clusters = 0
+    best_distortion = float('inf')
+    for i in range(len(distortions) - 1):
+        if abs(distortions[i] - distortions[i + 1]) < best_distortion:
+            best_n_clusters = i + 2
+            best_distortion = abs(distortions[i] - distortions[i + 1])
+
+    # Use the optimal number of clusters determined by the elbow method
+    n_clusters = best_n_clusters
+
     # Use k-means clustering to identify groups of similar customers
-    n_clusters = 5
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=20)
     clusters = kmeans.fit_predict(mispredictions.drop([word, 'Prediction'], axis=1))
 
+    # Use SelectKBest to identify the important features
+    """for i in range(n_clusters):
+        cluster_data = mispredictions[clusters == i].drop([word, 'Prediction'], axis=1)
+        X = cluster_data.values
+        Y = data_test[data_test[word] != data_test['Prediction']][word][clusters == i]
+        selector = SelectKBest(f_classif, k=1)
+        selector = selector.fit(X, Y)
+        mask = selector.get_support()
+        important_features = cluster_data.columns[mask]
+        print('Cluster ', i, 'important features: ', important_features)
+
+        # Make changes to the predictive model by removing the least important features
+        X_train_new = X_trainn.drop(important_features, axis=1)
+        X_test_new = X_testt.drop(important_features, axis=1)
+
+        model_new = LogisticRegression(max_iter=1000)
+        model_new.fit(scaler.fit_transform(X_train_new), Y_trainn)
+
+        Y_pred_new = model_new.predict(scaler.fit_transform(X_test_new))
+        accuracy_new = accuracy_score(Y_testt, Y_pred_new)
+        accuracy_dict.update({i: accuracy_new})
+        print('Model with the drop of the least important features in the cluster', i, 'is',
+              accuracy_new * 100, '%')
+
+    max_accuracy = max(accuracy_dict.values())
+    print('The max model we could get is', max_accuracy * 100, '%')
+    print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')"""
+
     # Use feature engineering to identify the common features that are contributing to the mispredictions in each
     # cluster
-    for i in range(n_clusters):
+    """for i in range(n_clusters):
         # print('Cluster ', i, 'common features: ')
         cluster_data = mispredictions[clusters == i].drop([word, 'Prediction'], axis=1)
         common_features = cluster_data.mean().sort_values(ascending=False)
@@ -48,22 +103,22 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
         # Make changes to the predictive model to reduce the misprediction rate For example, we might remove the
         # least informative features. So, we will drop the least informative features and retrain the model on the
         # original dataset with these changes
-        least_informative_features = common_features[common_features < 0.56].index
+        least_informative_features = common_features[common_features < 0.3].index
         X_train_new = X_trainn.drop(least_informative_features, axis=1)
         X_test_new = X_testt.drop(least_informative_features, axis=1)
 
         model_new = LogisticRegression(max_iter=1000)
-        model_new.fit(X_train_new, Y_trainn)
+        model_new.fit(scaler.fit_transform(X_train_new), Y_trainn)
 
-        Y_pred_new = model_new.predict(X_test_new)
+        Y_pred_new = model_new.predict(scaler.fit_transform(X_test_new))
         accuracy_new = accuracy_score(Y_testt, Y_pred_new)
         accuracy_dict.update({i: accuracy_new})
-        print('Accuracy of the model with the drop of the least informative features in the cluster', i, 'is',
+        print('Model with the drop of the least informative features in the cluster', i, 'is',
               accuracy_new * 100, '%')
 
     max_accuracy = max(accuracy_dict.values())
-    print('The max accuracy we could get is', max_accuracy * 100, '%')
-    print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')
+    print('The max model we could get is', max_accuracy * 100, '%')
+    print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')"""
 
 
 def py_optimize_neural(X_tr, X_te, Y_tr, Y_te):
@@ -77,10 +132,15 @@ def py_optimize_neural(X_tr, X_te, Y_tr, Y_te):
     hidden_size = 10
     output_size = 1
 
+    # Scale the inputs to have zero mean and unit variance
+    scaler = StandardScaler()
+    X_tr = scaler.fit_transform(X_tr)
+    X_te = scaler.fit_transform(X_te)
+
     # Convert the data to PyTorch tensors
-    X_tr = torch.tensor(X_tr.values, dtype=torch.float32)
+    X_tr = torch.tensor(X_tr, dtype=torch.float32)
     Y_tr = torch.tensor(Y_tr.values, dtype=torch.float32)
-    X_te = torch.tensor(X_te.values, dtype=torch.float32)
+    X_te = torch.tensor(X_te, dtype=torch.float32)
     Y_te = torch.tensor(Y_te.values, dtype=torch.float32)
 
     model = torch.nn.Sequential(
@@ -218,11 +278,13 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
     print("PyTorch Visualisation function")
     print()
     # Logistic Regression
+    # Scale the inputs to have zero mean and unit variance
+    scaler = StandardScaler()
     reg_model = LogisticRegression(max_iter=1000)
-    reg_model.fit(X_trainn, Y_trainn)
+    reg_model.fit(scaler.fit_transform(X_trainn), Y_trainn)
 
     # Predict the target variable for the testing set
-    Y_pred = reg_model.predict(X_testt)
+    Y_pred = reg_model.predict(scaler.fit_transform(X_testt))
     # Convert the predictions and actual outcomes to PyTorch tensors
     Y_pred_torch = torch.tensor(Y_pred, dtype=torch.float32)
     Y_test_torch = torch.tensor(Y_testt.values, dtype=torch.float32)
@@ -246,21 +308,20 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
+    # X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
+    # k_means_identify(X_train, X_test, Y_train, Y_test, "Class")
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    # py_different_model(X_train, Y_train)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
+
     # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
-    # py_different_model(X_train, Y_train)
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
-
-    # X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     # py_different_model(X_train, Y_train)
     # py_visualization(X_train, X_test, Y_train, Y_test)
-    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
 
     X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
-    py_different_model(X_train, Y_train)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
-
+    py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    # py_different_model(X_train, Y_train)
+    py_visualization(X_train, X_test, Y_train, Y_test)
