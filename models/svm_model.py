@@ -50,7 +50,6 @@ def generate_model(X_train, X_test, Y_train, Y_test):
     model = LinearSVC(random_state=0, tol=1e-5)
     model.fit(X_train, y_train)
     # Test the model on the test data
-    print("Test the model on the test data")
     y_pred = model.predict(X_test)
     misclassified = np.where(Y_test != y_pred)[0]
     print("Indices of potentially misclassified instances: ", misclassified)
