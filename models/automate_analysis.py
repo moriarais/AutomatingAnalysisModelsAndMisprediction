@@ -17,7 +17,14 @@ import process.process_churn as process_churn
 import process.process_bankrupt as process_bank
 import process.process_creditcard as process_card
 import config.config_creditcard as config_creditcard
+import process.process_health_diabetes as process_diabete
+import config.config_health_diabetes as config_diabete
 import numpy as np
+from numpy import var
+import warnings
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
@@ -28,12 +35,14 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
     scaler = StandardScaler()
     reg_model = LogisticRegression(max_iter=1000)
     reg_model.fit(scaler.fit_transform(X_trainn), Y_trainn)
-    log_reg_score = reg_model.score(scaler.fit_transform(X_testt), Y_testt)
-    accuracy_dict = {}
-    print('Logistic Regression before changes: ', log_reg_score * 100, '%')
 
     # Predict the target variable for the testing set
     Y_pred = reg_model.predict(scaler.fit_transform(X_testt))
+    accuracy = accuracy_score(Y_testt, Y_pred)
+    precision = precision_score(Y_testt, Y_pred)
+    recall = recall_score(Y_testt, Y_pred)
+    f1 = f1_score(Y_testt, Y_pred)
+    print('Logistic Regression before changes: accuracy, precision, recall, f1: ', accuracy, precision, recall, f1)
 
     # Identify the mispredictions and their associated feature values
     data_test = X_testt.copy()
@@ -59,38 +68,67 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
 
     # Use the optimal number of clusters determined by the elbow method
     n_clusters = best_n_clusters
+    accuracy_dict = {}
+    precision_dict = {}
+    recall_dict = {}
+    f1_dict = {}
 
     # Use k-means clustering to identify groups of similar customers
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=20)
     clusters = kmeans.fit_predict(mispredictions.drop([word, 'Prediction'], axis=1))
 
     # Use SelectKBest to identify the important features
-    """for i in range(n_clusters):
+    for i in range(n_clusters):
         cluster_data = mispredictions[clusters == i].drop([word, 'Prediction'], axis=1)
         X = cluster_data.values
         Y = data_test[data_test[word] != data_test['Prediction']][word][clusters == i]
-        selector = SelectKBest(f_classif, k=1)
-        selector = selector.fit(X, Y)
-        mask = selector.get_support()
-        important_features = cluster_data.columns[mask]
-        print('Cluster ', i, 'important features: ', important_features)
 
-        # Make changes to the predictive model by removing the least important features
-        X_train_new = X_trainn.drop(important_features, axis=1)
-        X_test_new = X_testt.drop(important_features, axis=1)
+        # Remove constant features
+        constant_features = [j for j, column in enumerate(X.T) if var(column) == 0]
+        X = np.delete(X, constant_features, axis=1)
+        cluster_data = cluster_data.drop(cluster_data.columns[constant_features], axis=1)
 
-        model_new = LogisticRegression(max_iter=1000)
-        model_new.fit(scaler.fit_transform(X_train_new), Y_trainn)
+        if X.shape[1] == 0:
+            print("Error: all features are constant")
+        else:
+            selector = SelectKBest(f_classif, k=1)
+            selector = selector.fit(X, Y)
+            mask = selector.get_support()
+            important_features = cluster_data.columns[mask]
+            # print('Cluster ', i, 'important features: ', important_features)
 
-        Y_pred_new = model_new.predict(scaler.fit_transform(X_test_new))
-        accuracy_new = accuracy_score(Y_testt, Y_pred_new)
-        accuracy_dict.update({i: accuracy_new})
-        print('Model with the drop of the least important features in the cluster', i, 'is',
-              accuracy_new * 100, '%')
+            # Make changes to the predictive model by removing the least important features
+            X_train_new = X_trainn.drop(important_features, axis=1)
+            X_test_new = X_testt.drop(important_features, axis=1)
+
+            model_new = LogisticRegression(max_iter=1000)
+            model_new.fit(scaler.fit_transform(X_train_new), Y_trainn)
+
+            Y_pred_new = model_new.predict(scaler.fit_transform(X_test_new))
+            accuracy_new = accuracy_score(Y_testt, Y_pred_new)
+            accuracy_dict.update({i: accuracy_new})
+            precision_new = precision_score(Y_testt, Y_pred_new)
+            precision_dict.update({i: precision_new})
+            recall_new = recall_score(Y_testt, Y_pred_new)
+            recall_dict.update({i: recall_new})
+            f1_new = f1_score(Y_testt, Y_pred_new)
+            f1_dict.update({i: f1_new})
+            # print('Model with the drop of the least important features in the cluster', i, 'is',
+            #      accuracy_new * 100, '%')
 
     max_accuracy = max(accuracy_dict.values())
-    print('The max model we could get is', max_accuracy * 100, '%')
-    print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')"""
+    print('The max accuracy we could get is', max_accuracy)
+
+    max_precision = max(precision_dict.values())
+    print('The max precision we could get is', max_precision)
+
+    max_recall = max(recall_dict.values())
+    print('The max recall we could get is', max_recall)
+
+    max_f = max(f1_dict.values())
+    print('The max f1 we could get is', max_f)
+
+    print('We gain a better accuracy of the model of', (max_accuracy - accuracy) * 100, '%')
 
     # Use feature engineering to identify the common features that are contributing to the mispredictions in each
     # cluster
@@ -314,6 +352,12 @@ if __name__ == "__main__":
     # py_different_model(X_train, Y_train)
     # py_visualization(X_train, X_test, Y_train, Y_test)
 
+    # X_train, X_test, Y_train, Y_test = process_diabete.getProcessedData(config_diabete.Location.data_process)
+    # k_means_identify(X_train, X_test, Y_train, Y_test,)
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    # py_different_model(X_train, Y_train)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
+
     # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
     # py_optimize_neural(X_train, X_test, Y_train, Y_test)
@@ -322,6 +366,6 @@ if __name__ == "__main__":
 
     X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
     # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
-    py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_different_model(X_train, Y_train)
-    py_visualization(X_train, X_test, Y_train, Y_test)
+    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    py_different_model(X_train, Y_train)
+    # py_visualization(X_train, X_test, Y_train, Y_test)
