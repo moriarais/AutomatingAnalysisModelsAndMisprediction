@@ -1,4 +1,5 @@
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 
 
@@ -42,6 +43,9 @@ def get_process_data_churn(file):
     X = churn_df.drop(['Churn'], axis=1)
     Y = churn_df['Churn']
 
-    #  we split the data into training and testing sets
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+    over_sample = SMOTE()
+    X_ros, Y_ros = over_sample.fit_resample(X, Y)
+
+    # we split the data into training and testing sets
+    X_train, X_test, Y_train, Y_test = train_test_split(X_ros, Y_ros, test_size=0.2, random_state=42)
     return X_train, X_test, Y_train, Y_test
