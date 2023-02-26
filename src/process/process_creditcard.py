@@ -4,67 +4,9 @@ import pandas as pd
 from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 import pickle
-
 import config.config_creditcard as config_creditcard
+import process.process_utils as process_utils
 # import AutomatingAnalysisModelsAndMisprediction.src.config.config_creditcard as config_creditcard
-
-
-def get_raw_data(data_location: str):
-    """Read raw data
-    """
-    return pd.read_csv(data_location)
-
-
-def get_X_y(data: pd.DataFrame, label: str):
-    """Get features and label
-    """
-    X = data.drop(columns=label)
-    y = data[label]
-    return X, y
-
-
-def split_train_test(X: pd.DataFrame, y: pd.DataFrame, test_size: int):
-    """_summary_
-
-    Parameters
-    ----------
-    X : pd.DataFrame
-        Features
-    y : pd.DataFrame
-        Target
-    test_size : int
-        Size of the test set
-    """
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=0
-    )
-    return {
-        "X_train": X_train,
-        "X_test": X_test,
-        "y_train": y_train,
-        "y_test": y_test,
-    }
-
-
-def save_processed_data(data: dict, save_location: str):
-    """Save processed data
-
-    Parameters
-    ----------
-    data : dict
-        Data to process
-    save_location : str
-        Where to save the data
-    """
-    with open(save_location, "wb") as f:
-        pickle.dump(data, f)
-
-
-def print_pkl_file(file_path: str):
-    # read python dict back from the file
-    with open(file_path, 'rb') as f:
-        svm_model, (X_train, X_test, y_train, y_test) = pickle.load(f)
-    return X_train, X_test, y_train, y_test
 
 
 def process(
@@ -72,7 +14,7 @@ def process(
 ):
     """Flow to process the Data
     """
-    data = get_raw_data(location.data_raw)
+    data = process_utils.get_raw_data(location.data_raw)
 
     # Cleaning the data process:
 
@@ -85,7 +27,8 @@ def process(
 
     # 3. Convert to numeric Class feature
     # 0 - non-fraudulent. 1 - fraudulent.
-    data[config_creditcard.ProcessConfig.label] = pd.to_numeric(data[config_creditcard.ProcessConfig.label], errors='coerce')
+    data[config_creditcard.ProcessConfig.label] = pd.to_numeric(data[config_creditcard.ProcessConfig.label],
+                                                                errors='coerce')
 
     processed = data
     processed = pd.get_dummies(processed)
@@ -113,7 +56,12 @@ def getProcessedData(file_path: str):
     y_test = split_dict["y_test"]
     return X_train, X_test, y_train, y_test
 
+    X, y = process_utils.get_X_y(processed, config_creditcard.ProcessConfig.label)
+    split_data = process_utils.split_train_test(X, y, config_creditcard.ProcessConfig.test_size)
+    process_utils.save_processed_data(split_data, config_creditcard.Location.data_process)
+
+
 
 if __name__ == "__main__":
     process()
-    X_train, X_test, y_train, y_test = getProcessedData(config_creditcard.Location.data_process)
+    X_train, X_test, y_train, y_test = process_utils.getProcessedData(config_creditcard.Location.data_process)
