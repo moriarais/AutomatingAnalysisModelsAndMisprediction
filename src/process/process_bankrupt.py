@@ -10,7 +10,6 @@ def get_process_data_bankrupt(file):
     # Load the customer churn dataset into dataframe.
     bankrupt_df = pd.read_csv(file)
     # print(bankrupt_df.head(5))
-
     # print(bankrupt_df.info())
     # As we can see no value is categorical, That's good news for us.
     # Let's check if any values are null or not
