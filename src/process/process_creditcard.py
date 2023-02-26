@@ -1,6 +1,7 @@
 """Python script to process the data"""
 
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from sklearn.model_selection import train_test_split
 import pickle
 
@@ -92,7 +93,11 @@ def process(
     # print(processed.describe())
 
     X, y = get_X_y(processed, config_creditcard.ProcessConfig.label)
-    split_data = split_train_test(X, y, config_creditcard.ProcessConfig.test_size)
+
+    over_sample = SMOTE()
+    X_ros, Y_ros = over_sample.fit_resample(X, y)
+
+    split_data = split_train_test(X_ros, Y_ros, config_creditcard.ProcessConfig.test_size)
     save_processed_data(split_data, config_creditcard.Location.data_process)
 
 
