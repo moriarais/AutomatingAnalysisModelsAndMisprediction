@@ -1,6 +1,9 @@
 """Python script to process the data"""
 
 import pandas as pd
+from imblearn.over_sampling import SMOTE
+from sklearn.model_selection import train_test_split
+import pickle
 
 import config.config_health_diabetes as config_diabetes
 import process.process_utils as process_utils
@@ -33,9 +36,31 @@ def process(
     # After cleaning and processing the database, display general statistics of dataset
     # print(processed.describe())
 
+    X, y = get_X_y(processed, config_diabetes.ProcessConfig.label)
+
+    over_sample = SMOTE()
+    X_ros, Y_ros = over_sample.fit_resample(X, y)
+
+    split_data = split_train_test(X_ros, Y_ros, config_diabetes.ProcessConfig.test_size)
+    save_processed_data(split_data, config_diabetes.Location.data_process)
+
+
+
+def getProcessedData(file_path: str):
+    # read python dict back from the file
+    with open(file_path, 'rb') as f:
+        split_dict = pickle.load(f)
+
+    X_train = split_dict["X_train"]
+    X_test = split_dict["X_test"]
+    y_train = split_dict["y_train"]
+    y_test = split_dict["y_test"]
+    return X_train, X_test, y_train, y_test
+
     X, y = process_utils.get_X_y(processed, config_diabetes.ProcessConfig.label)
     split_data = process_utils.split_train_test(X, y, config_diabetes.ProcessConfig.test_size)
     process_utils.save_processed_data(split_data, config_diabetes.Location.data_process)
+
 
 
 if __name__ == "__main__":
