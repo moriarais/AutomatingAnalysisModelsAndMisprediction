@@ -320,7 +320,7 @@ if __name__ == "__main__":
     X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
     k_means_identify(X_train, X_test, Y_train, Y_test, "Class")
     py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_different_model(X_train, Y_train)
+    #py_different_model(X_train, Y_train)
     py_visualization(X_train, X_test, Y_train, Y_test)
 
     X_train, X_test, Y_train, Y_test = process_diabete.getProcessedData(config_diabete.Location.data_process)
