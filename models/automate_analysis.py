@@ -1,8 +1,7 @@
 import torch
 from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.feature_selection import RFE, SelectKBest, f_classif
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, silhouette_score
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -89,13 +88,12 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
         cluster_data = cluster_data.drop(cluster_data.columns[constant_features], axis=1)
 
         if X.shape[1] == 0:
-            print("Error: all features are constant")
+            print("All features are constant in this cluster")
         else:
             selector = SelectKBest(f_classif, k=1)
             selector = selector.fit(X, Y)
             mask = selector.get_support()
             important_features = cluster_data.columns[mask]
-            # print('Cluster ', i, 'important features: ', important_features)
 
             # Make changes to the predictive model by removing the least important features
             X_train_new = X_trainn.drop(important_features, axis=1)
@@ -113,8 +111,6 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
             recall_dict.update({i: recall_new})
             f1_new = f1_score(Y_testt, Y_pred_new)
             f1_dict.update({i: f1_new})
-            # print('Model with the drop of the least important features in the cluster', i, 'is',
-            #      accuracy_new * 100, '%')
 
     max_accuracy = max(accuracy_dict.values())
     print('The max accuracy we could get is', max_accuracy)
@@ -129,34 +125,9 @@ def k_means_identify(X_trainn, X_testt, Y_trainn, Y_testt, word):
     print('The max f1 we could get is', max_f)
 
     print('We gain a better accuracy of the model of', (max_accuracy - accuracy) * 100, '%')
-
-    # Use feature engineering to identify the common features that are contributing to the mispredictions in each
-    # cluster
-    """for i in range(n_clusters):
-        # print('Cluster ', i, 'common features: ')
-        cluster_data = mispredictions[clusters == i].drop([word, 'Prediction'], axis=1)
-        common_features = cluster_data.mean().sort_values(ascending=False)
-        # print(common_features)
-
-        # Make changes to the predictive model to reduce the misprediction rate For example, we might remove the
-        # least informative features. So, we will drop the least informative features and retrain the model on the
-        # original dataset with these changes
-        least_informative_features = common_features[common_features < 0.3].index
-        X_train_new = X_trainn.drop(least_informative_features, axis=1)
-        X_test_new = X_testt.drop(least_informative_features, axis=1)
-
-        model_new = LogisticRegression(max_iter=1000)
-        model_new.fit(scaler.fit_transform(X_train_new), Y_trainn)
-
-        Y_pred_new = model_new.predict(scaler.fit_transform(X_test_new))
-        accuracy_new = accuracy_score(Y_testt, Y_pred_new)
-        accuracy_dict.update({i: accuracy_new})
-        print('Model with the drop of the least informative features in the cluster', i, 'is',
-              accuracy_new * 100, '%')
-
-    max_accuracy = max(accuracy_dict.values())
-    print('The max model we could get is', max_accuracy * 100, '%')
-    print('We gain a better accuracy of the model of', (max_accuracy - log_reg_score) * 100, '%')"""
+    print('We gain a better precision of the model of', (max_precision - precision) * 100, '%')
+    print('We gain a better recall of the model of', (max_recall - recall) * 100, '%')
+    print('We gain a better f1 score of the model of', (max_f - f1) * 100, '%')
 
 
 def py_optimize_neural(X_tr, X_te, Y_tr, Y_te):
@@ -346,26 +317,26 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
-    # X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
-    # k_means_identify(X_train, X_test, Y_train, Y_test, "Class")
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_different_model(X_train, Y_train)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
+    X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
+    k_means_identify(X_train, X_test, Y_train, Y_test, "Class")
+    py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    #py_different_model(X_train, Y_train)
+    py_visualization(X_train, X_test, Y_train, Y_test)
 
-    # X_train, X_test, Y_train, Y_test = process_diabete.getProcessedData(config_diabete.Location.data_process)
-    # k_means_identify(X_train, X_test, Y_train, Y_test,)
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_different_model(X_train, Y_train)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
+    X_train, X_test, Y_train, Y_test = process_diabete.getProcessedData(config_diabete.Location.data_process)
+    k_means_identify(X_train, X_test, Y_train, Y_test, 'Outcome')
+    py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    py_different_model(X_train, Y_train)
+    py_visualization(X_train, X_test, Y_train, Y_test)
 
-    # X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
-    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    # py_different_model(X_train, Y_train)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
+    X_train, X_test, Y_train, Y_test = process_churn.get_process_data_churn('../data/raw/customer_churn.csv')
+    k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
+    py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    py_different_model(X_train, Y_train)
+    py_visualization(X_train, X_test, Y_train, Y_test)
 
     X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
-    # k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
-    # py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
+    py_optimize_neural(X_train, X_test, Y_train, Y_test)
     py_different_model(X_train, Y_train)
-    # py_visualization(X_train, X_test, Y_train, Y_test)
+    py_visualization(X_train, X_test, Y_train, Y_test)
