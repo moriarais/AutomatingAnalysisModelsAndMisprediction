@@ -27,6 +27,8 @@ class Location():
     health_data_raw: str = f"{data_dir}\\raw\\health_diabetes.csv"
     health_data_process: str = f"{data_dir}\\processed\\health_diabetes.pkl"
     
+    customer_churn_data_csv_process: str = f"{data_dir}\\processed\\customer_churn.csv"
+    customer_churn_data_process: str = f"{data_dir}\\processed\\customer_churn.pkl"
     
     
     
@@ -39,5 +41,6 @@ class ProcessConfig:
     
     health_label: str = "Outcome"
     
+    churn_label: str = "Churn"
     
     test_size: float = 0.2
