@@ -317,7 +317,7 @@ def py_visualization(X_trainn, X_testt, Y_trainn, Y_testt):
 
 
 if __name__ == "__main__":
-    X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
+    """X_train, X_test, Y_train, Y_test = process_card.getProcessedData(config_creditcard.Location.data_process)
     k_means_identify(X_train, X_test, Y_train, Y_test, "Class")
     py_optimize_neural(X_train, X_test, Y_train, Y_test)
     #py_different_model(X_train, Y_train)
@@ -333,10 +333,10 @@ if __name__ == "__main__":
     k_means_identify(X_train, X_test, Y_train, Y_test, 'Churn')
     py_optimize_neural(X_train, X_test, Y_train, Y_test)
     py_different_model(X_train, Y_train)
-    py_visualization(X_train, X_test, Y_train, Y_test)
+    py_visualization(X_train, X_test, Y_train, Y_test)"""
 
     X_train, X_test, Y_train, Y_test = process_bank.get_process_data_bankrupt('../data/raw/company_bankruptcy.csv')
-    k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
-    py_optimize_neural(X_train, X_test, Y_train, Y_test)
-    py_different_model(X_train, Y_train)
+    #k_means_identify(X_train, X_test, Y_train, Y_test, 'Bankrupt?')
+    #py_optimize_neural(X_train, X_test, Y_train, Y_test)
+    #py_different_model(X_train, Y_train)
     py_visualization(X_train, X_test, Y_train, Y_test)
