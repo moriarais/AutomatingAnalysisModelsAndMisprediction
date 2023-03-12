@@ -1,7 +1,4 @@
-scikit-learn
 imblearn
 mlxtend
 h2o
 torch
-matplotlib
-seaborn
