@@ -2,7 +2,6 @@
 imblearn
 mlxtend
 torch
-copy
 
 ###### Requirements with Version Specifiers ######
 h2o~=3.40.0.1
